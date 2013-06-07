@@ -34,26 +34,11 @@ class Add_Image_Size {
 	function register_options() {
 		register_setting( 'add-image-size', 'ais-images', array( &$this, 'sanitize' ) );
 
-		// delete_option( 'ais-images' );
 		add_settings_section( 'ais-section', __( 'Image Size Properties', $this->td ), function() { echo ''; }, $this->page_name );
 		add_settings_field( 'ais-image-row', __( 'Images:', $this->td ), array( &$this, 'field' ), $this->page_name, 'ais-section', get_option( 'ais-images', false ) );
 	}
 
 	function sanitize( $input ) {
-		$sample = array(
-			array(
-				'name' => 'itty-bitty',
-				'width' => 50,
-				'height' => 50,
-				'crop' => 1
-			),
-			array(
-				'name' => 'itty-bitty',
-				'width' => 50,
-				'height' => 50,
-				'crop' => 1
-			),
-		);
 		$newinput = array();
 		foreach( $input as $k => $image_deets ) {
 
@@ -154,9 +139,5 @@ class Add_Image_Size {
 	}
 
 }
-if ( ! function_exists( 'printer') ) {
-	function printer( $input ) {
-		echo '<pre>' . print_r( $input, true ) . '</pre>';
-	}
-}
+
 //eof
