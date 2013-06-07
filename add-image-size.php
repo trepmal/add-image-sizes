@@ -33,7 +33,7 @@ class Add_Image_Size {
 	}
 
 	function register_options() {
-		register_setting( 'add-image-size', 'ais-images', array( &$this, 'sanitize' ) );
+		register_setting( 'add-image-size-group', 'ais-images', array( &$this, 'sanitize' ) );
 
 		add_settings_section( 'ais-section', __( 'Image Size Properties', $this->td ), function() { echo ''; }, $this->page_name );
 		add_settings_field( 'ais-image-row', __( 'Images:', $this->td ), array( &$this, 'field' ), $this->page_name, 'ais-section', get_option( 'ais-images', false ) );
@@ -99,14 +99,13 @@ class Add_Image_Size {
 		<p><?php _e( 'Create additional named image sizes for easy use', $this->td ); ?></p>
 		<form method="post" action="options.php">
 		<?php
-			settings_fields( 'add-image-size' );
+			settings_fields( 'add-image-size-group' );
 			do_settings_sections( $this->page_name );
 			echo '<p>';
 			submit_button( __( 'Save', $this->td ), 'primary', 'ais-submit', false );
 			echo ' ';
 			submit_button( __( 'Add', $this->td ), 'small', 'ais-add', false );
 			echo '</p>';
-
 		?>
 		</form>
 		</div><?php
