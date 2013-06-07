@@ -13,9 +13,6 @@
  * Network:
  */
 
-// @todo ajax admin
-// @todo actually create the image sizes
-
 $add_image_size = new Add_Image_Size();
 
 class Add_Image_Size {
@@ -26,6 +23,7 @@ class Add_Image_Size {
 	function __construct() {
 		add_action( 'admin_init', array( &$this, 'register_options' ) );
 		add_action( 'admin_menu', array( &$this, 'menu' ) );
+		add_action( 'wp_ajax_get_uniqid', array( &$this, 'get_uniqid_cb' ) );
 
 		$sizes = get_option( 'ais-images', false );
 		if ( $sizes ) foreach ( $sizes as $image_deets ) {
@@ -82,18 +80,19 @@ class Add_Image_Size {
 	}
 
 	function field( $args ) {
-		// printer( $args );
+		// saved fields
 		if ( $args != false ) foreach( $args as $id => $params ) {
 			echo $this->__fields( $params, $id );
 		}
+		// empty set for new
 		echo $this->__fields();
 	}
 
 	function __fields( $values=array(), $key_id='blah' ) {
-		$defaults = array( 'name' => '', 'width' => null, 'height' => null, 'crop' => 0 );
+		$defaults = array( 'name' => '', 'width' => null, 'height' => null, 'crop' => false );
 		$values = wp_parse_args( $values, $defaults );
-		$cb_crop = checked( $values['crop'], null, false );
-		$html = "<p>".
+		$cb_crop = checked( $values['crop'], true, false );
+		$html = "<p class='ais-field-row'>".
 				"<input type='text' name='ais-images[{$key_id}][name]' value='{$values['name']}' placeholder='name' />".
 				"<input type='text' name='ais-images[{$key_id}][width]' value='{$values['width']}' placeholder='width' />".
 				"<input type='text' name='ais-images[{$key_id}][height]' value='{$values['height']}' placeholder='height' />".
@@ -108,20 +107,50 @@ class Add_Image_Size {
 	}
 
 	function page() {
+		add_action( 'admin_footer', array( &$this, 'admin_footer' ) );
 		?><div class="wrap">
 		<h2><?php _e( 'Image Sizes', $this->td ); ?></h2>
 		<p><?php _e( 'Create additional named image sizes for easy use', $this->td ); ?></p>
 		<form method="post" action="options.php">
 		<?php
-		settings_fields( 'add-image-size' );
-		do_settings_sections( $this->page_name );
-		submit_button();
-		?>
-		</form>
-		<?php
+			settings_fields( 'add-image-size' );
+			do_settings_sections( $this->page_name );
+			echo '<p>';
+			submit_button( __( 'Save', $this->td ), 'primary', 'ais-submit', false );
+			echo ' ';
+			submit_button( __( 'Add', $this->td ), 'small', 'ais-add', false );
+			echo '</p>';
 
 		?>
+		</form>
 		</div><?php
+	}
+
+	function admin_footer() {
+		?><script>
+		jQuery(document).ready(function($){
+
+			$('.wrap').on( 'click', '#ais-add', function(ev) {
+				ev.preventDefault();
+				console.log( 'yep' );
+				$.post( ajaxurl, {
+					action: 'get_uniqid',
+					nonce: '<?php echo wp_create_nonce('ais-new-row'); ?>'
+				}, function( resp ) {
+					if ( resp == '-1' )
+						alert( '<?php _e( 'Not Allowed' ); ?>' );
+					else
+						$('.ais-field-row:last-child').after( resp );
+				});
+			});
+
+		});
+		</script><?php
+	}
+
+	function get_uniqid_cb() {
+		if ( check_ajax_referer( 'ais-new-row', 'nonce' ) )
+			die( $this->__fields( array(), uniqid() ) );
 	}
 
 }
