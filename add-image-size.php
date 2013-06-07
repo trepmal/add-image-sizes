@@ -1,8 +1,8 @@
 <?php
 /*
  * Plugin Name: Add Image Size
- * Plugin URI: GUI for add_image_size()
- * Description:
+ * Plugin URI:
+ * Description: GUI for add_image_size()
  * Version:
  * Author: Kailey Lampert
  * Author URI: kaileylampert.com
