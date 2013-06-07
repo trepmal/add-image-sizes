@@ -23,6 +23,7 @@ class Add_Image_Size {
 	function __construct() {
 		add_action( 'admin_init', array( &$this, 'register_options' ) );
 		add_action( 'admin_menu', array( &$this, 'menu' ) );
+		add_filter( 'contextual_help', array( &$this, 'contextual_help' ), 10, 3 );
 		add_action( 'wp_ajax_get_uniqid', array( &$this, 'get_uniqid_cb' ) );
 
 		$sizes = get_option( 'ais-images', false );
@@ -131,6 +132,19 @@ class Add_Image_Size {
 
 		});
 		</script><?php
+	}
+
+	function contextual_help( $old, $id, $object ) {
+		if ( $id != $this->page_name ) return $old;
+		$help_text = '';
+		$help_text .= '<p>'. __( 'Names must be unique', $this->td ) .'</p>';
+		$help_text .= '<p>'. __( 'To change built-in image sizes, visit the <a href="http://local.dev/nnkpr/wp-admin/options-media.php">Media Settings</a> page.', $this->td ) .'</p>';
+		$help_text .= '<p>'. __( 'Changing width/height will not apply retroactively. Use a plugin like <a href="http://wordpress.org/plugins/regenerate-thumbnails/">Regenerate Thumbnails</a> to do just that.', $this->td ).'</p>';
+		$object->add_help_tab( array(
+			'id' => 'ais-help',
+			'title' => __( 'Overview', $this->td ),
+			'content' => $help_text
+		) );
 	}
 
 	function get_uniqid_cb() {
