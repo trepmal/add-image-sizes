@@ -1,7 +1,7 @@
 <?php
 /*
  * Plugin Name: Add Image Size
- * Plugin URI:
+ * Plugin URI: https://github.com/trepmal/add-image-sizes
  * Description: GUI for add_image_size()
  * Version:
  * Author: Kailey Lampert
@@ -24,7 +24,7 @@ class Add_Image_Size {
 		add_action( 'admin_init', array( &$this, 'register_options' ) );
 		add_action( 'admin_menu', array( &$this, 'menu' ) );
 		add_filter( 'contextual_help', array( &$this, 'contextual_help' ), 10, 3 );
-		add_action( 'wp_ajax_get_uniqid', array( &$this, 'get_uniqid_cb' ) );
+		add_action( 'wp_ajax_get_new_row', array( &$this, 'get_new_row_cb' ) );
 
 		$sizes = get_option( 'ais-images', false );
 		if ( $sizes ) foreach ( $sizes as $image_deets ) {
@@ -119,7 +119,7 @@ class Add_Image_Size {
 				ev.preventDefault();
 				console.log( 'yep' );
 				$.post( ajaxurl, {
-					action: 'get_uniqid',
+					action: 'get_new_row',
 					nonce: '<?php echo wp_create_nonce('ais-new-row'); ?>'
 				}, function( resp ) {
 					if ( resp == '-1' )
@@ -146,7 +146,7 @@ class Add_Image_Size {
 		) );
 	}
 
-	function get_uniqid_cb() {
+	function get_new_row_cb() {
 		if ( check_ajax_referer( 'ais-new-row', 'nonce' ) )
 			die( $this->__fields( array(), uniqid() ) );
 	}
