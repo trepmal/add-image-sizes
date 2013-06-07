@@ -13,7 +13,6 @@
  * Network:
  */
 
-// @todo Localize
 // @todo ajax admin
 // @todo actually create the image sizes
 
@@ -22,6 +21,7 @@ $add_image_size = new Add_Image_Size();
 class Add_Image_Size {
 
 	var $page_name;
+	var $td = 'add-image-size'; // text domain
 
 	function __construct() {
 		add_action( 'admin_init', array( &$this, 'register_options' ) );
@@ -37,8 +37,8 @@ class Add_Image_Size {
 		register_setting( 'add-image-size', 'ais-images', array( &$this, 'sanitize' ) );
 
 		// delete_option( 'ais-images' );
-		add_settings_section( 'ais-section', 'Image Size Properties', function() { echo ''; }, $this->page_name );
-		add_settings_field( 'ais-image-row', 'Images:', array( &$this, 'field' ), $this->page_name, 'ais-section', get_option( 'ais-images', false ) );
+		add_settings_section( 'ais-section', __( 'Image Size Properties', $this->td ), function() { echo ''; }, $this->page_name );
+		add_settings_field( 'ais-image-row', __( 'Images:', $this->td ), array( &$this, 'field' ), $this->page_name, 'ais-section', get_option( 'ais-images', false ) );
 	}
 
 	function sanitize( $input ) {
@@ -75,7 +75,7 @@ class Add_Image_Size {
 			}
 
 			unset( $input[ $k ] );
-			$newinput[ uniqid() ] = compact( 'name', 'width', 'height', 'crop' );
+			$newinput[ $name ] = compact( 'name', 'width', 'height', 'crop' );
 		}
 
 		return $newinput;
@@ -84,32 +84,33 @@ class Add_Image_Size {
 	function field( $args ) {
 		// printer( $args );
 		if ( $args != false ) foreach( $args as $id => $params ) {
-			?>
-		<input type="text" name="ais-images[<?php echo $id; ?>][name]" value="<?php echo $params['name']; ?>" />
-		<input type="text" name="ais-images[<?php echo $id; ?>][width]" value="<?php echo $params['width']; ?>" />
-		<input type="text" name="ais-images[<?php echo $id; ?>][height]" value="<?php echo $params['height']; ?>" />
-		<input type="hidden" name="ais-images[<?php echo $id; ?>][crop]" value="0" />
-		<input type="checkbox" name="ais-images[<?php echo $id; ?>][crop]" value="1" <?php checked( $params['crop'] ); ?> />
-			<?php
+			echo $this->__fields( $params, $id );
 		}
-		$key_id = 'blah';
-		?>
-		<input type="text" name="ais-images[<?php echo $key_id; ?>][name]" value="" />
-		<input type="text" name="ais-images[<?php echo $key_id; ?>][width]" value="" />
-		<input type="text" name="ais-images[<?php echo $key_id; ?>][height]" value="" />
-		<input type="hidden" name="ais-images[<?php echo $key_id; ?>][crop]" value="0" />
-		<input type="checkbox" name="ais-images[<?php echo $key_id; ?>][crop]" value="1" />
-		<?php
+		echo $this->__fields();
+	}
+
+	function __fields( $values=array(), $key_id='blah' ) {
+		$defaults = array( 'name' => '', 'width' => null, 'height' => null, 'crop' => 0 );
+		$values = wp_parse_args( $values, $defaults );
+		$cb_crop = checked( $values['crop'], null, false );
+		$html = "<p>".
+				"<input type='text' name='ais-images[{$key_id}][name]' value='{$values['name']}' placeholder='name' />".
+				"<input type='text' name='ais-images[{$key_id}][width]' value='{$values['width']}' placeholder='width' />".
+				"<input type='text' name='ais-images[{$key_id}][height]' value='{$values['height']}' placeholder='height' />".
+				"<input type='hidden' name='ais-images[{$key_id}][crop]' value='0' />".
+				"<label> <input type='checkbox' name='ais-images[{$key_id}][crop]' value='1' $cb_crop /> Crop</label>".
+				"</p>";
+		return $html;
 	}
 
 	function menu() {
-		$this->page_name = add_options_page( __( 'Image Sizes', 'add-image-size' ), __( 'Image Sizes', 'add-image-size' ), 'edit_posts', __CLASS__, array( &$this, 'page' ) );
+		$this->page_name = add_options_page( __( 'Image Sizes', $this->td ), __( 'Image Sizes', $this->td ), 'edit_posts', __CLASS__, array( &$this, 'page' ) );
 	}
 
 	function page() {
 		?><div class="wrap">
-		<h2><?php _e( 'Image Sizes', 'add-image-size' ); ?></h2>
-		<p>Create additional named image sizes for easy use</p>
+		<h2><?php _e( 'Image Sizes', $this->td ); ?></h2>
+		<p><?php _e( 'Create additional named image sizes for easy use', $this->td ); ?></p>
 		<form method="post" action="options.php">
 		<?php
 		settings_fields( 'add-image-size' );
