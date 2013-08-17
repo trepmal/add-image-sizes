@@ -1,6 +1,6 @@
 <?php
 
-class AddImageSizeTest extends WP_UnitTestCase {
+class AddImageSize_Test extends WP_UnitTestCase {
 
 		function testAddImageSize() {
 			$this->assertTrue( true  );
