@@ -8,4 +8,3 @@ function _manually_load_plugin() {
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
 require getenv( 'WP_TESTS_DIR' ) . '/includes/bootstrap.php';
-
